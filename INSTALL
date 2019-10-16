@@ -1,0 +1,18 @@
+Package providing a set of tools for debugging python code with GDB
+
+Tested with Python 2.7.5
+
+Dependencies:
+=============
+gdb python: https://wiki.python.org/moin/DebuggingWithGdb
+C compiler (e.g. gcc), Python development headers,
+
+Install:
+=================
+pip install .
+ln -sf .gdbinit ~/
+
+Uninstall:
+=================
+pip uninstall pygdb
+rm -f ~/.gdbinit
