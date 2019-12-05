@@ -97,7 +97,7 @@ def set_logger(logger):
     return result
 
 
-def set():
+def set(logger=None):
     """Used to set breakpoint, busy-wait until gdb console is connected"""
     if not enabled:
         return
@@ -106,6 +106,8 @@ def set():
 
     # Wait for gdb console
     breakpoint_lock.acquire()
+    if logger is not None:
+        set_logger(logger)
     while not console_connected:
         log("breakpoint.set: waiting for gdb console")
         breakpoint_lock.release()
