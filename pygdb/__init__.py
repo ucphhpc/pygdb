@@ -52,7 +52,7 @@ short_name = 'pygdb'
 # IMPORTANT: Please keep version in sync with doc-src/README.t2t
 
 version_tuple = (0, 1, 0)
-version_suffix = ''
+version_suffix = 'post1'
 version_string = '.'.join([str(i) for i in version_tuple]) + version_suffix
 package_version = '%s %s' % (package_name, version_string)
 project_team = 'The pygdb Project lead by Brian Vinter'
