@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # pygdb.console.extension - python gdb console extension functions
-# Copyright (C) 2019  The pygdb Project lead by Brian Vinter
+# Copyright (C) 2019-2020  The pygdb Project lead by Brian Vinter
 #
 # This file is part of pygdb.
 #
@@ -216,38 +216,24 @@ def list_pyframe(start=None, end=None):
     fh.close()
 
 
-def set_console_connected():
-    """Tell 'pygdb.breakpoint' that gdb console is connected"""
-    main_thread_num = gdb.selected_inferior().threads()[-1].num
-    gdb.execute('thread %s' % main_thread_num)
-    gdb.newest_frame().select()
-    more_frames = True
-    while more_frames:
-        more_frames = move_in_stack(move_up=True, silently=True)
-    (value_scope, value) = get_pyobject_value('pygdb')
-    if value_scope and value \
-            and (value.get_truncated_repr(sys.maxint)).startswith(
-                '<module at remote'):
-        result = True
-        cmd = "pygdb.breakpoint.set_console_connected()"
-        inject_pyframe(cmd)
-    else:
-        result = False
-        print "Missing pygdb module in python script"
-
-    return result
-
-
 def attach(pid):
-    """Attach process, mark gdb console as connected, delete old breakpoints,
-    and continue until first breakpoint"""
+    """Delete old breakpoints, add python breakpoint,
+    attach process and signal that GDB console is attached"""
 
+    # Delete old breakpoints
+    gdb.execute('delete breakpoints')
+
+    # Attach process
     gdb.execute('attach %d' % pid)
-    if set_console_connected():
-        # Set breakpoint
-        gdb.execute('break %s' % __breakpoint_identifier)
-        gdb.execute('continue')
-        breakpoint_list()
+
+    # Add python breakpoint to breakpoints
+    gdb.execute('break %s' % __breakpoint_identifier)
+
+    # Signal that GDB console is connected (handled by pygdb.breakpoint)
+    gdb.execute('signal SIGCONT')
+
+    # Show breakpoint
+    breakpoint_list()
 
 
 def list_threads():

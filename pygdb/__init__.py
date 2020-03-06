@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # __init__ - gdb python extensions
-# Copyright (C) 2019  The pygdb Project lead by Brian Vinter
+# Copyright (C) 2019-2020  The pygdb Project lead by Brian Vinter
 #
 # This file is part of pygdb.
 #
@@ -52,7 +52,7 @@ short_name = 'pygdb'
 # IMPORTANT: Please keep version in sync with doc-src/README.t2t
 
 version_tuple = (0, 1, 0)
-version_suffix = 'post1'
+version_suffix = 'post2'
 version_string = '.'.join([str(i) for i in version_tuple]) + version_suffix
 package_version = '%s %s' % (package_name, version_string)
 project_team = 'The pygdb Project lead by Brian Vinter'

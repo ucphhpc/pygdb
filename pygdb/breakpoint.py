@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # breakpoint - Python GDB breakpoint
-# Copyright (C) 2019  The pygdb Project lead by Brian Vinter
+# Copyright (C) 2019-2020  The pygdb Project lead by Brian Vinter
 #
 # This file is part of pygdb.
 #
@@ -43,6 +43,7 @@ from the GDB console.
 import os
 import sys
 import logging
+import signal
 import time
 import threading
 import _pygdb
@@ -50,7 +51,20 @@ import _pygdb
 enabled = False
 gdb_logger = None
 console_connected = None
-breakpoint_lock = None
+breakpoint_lock = threading.Lock()
+
+
+def handle_sigcont(signalNumber, frame):
+    """ NOTE: We do not forward SIGCONT because: 
+    You can set a handler, but SIGCONT always makes the process continue regardless:
+    https://www.gnu.org/software/libc/manual/html_node/Job-Control-Signals.html 
+    """
+    global console_connected
+    breakpoint_lock.acquire()
+    if not console_connected:
+        console_connected = True
+        log("GDB console attached")
+    breakpoint_lock.release()
 
 
 def enable(logger=None):
@@ -59,11 +73,14 @@ def enable(logger=None):
     global console_connected
     global breakpoint_lock
 
-    enabled = True
-    console_connected = False
-    breakpoint_lock = threading.Lock()
-    set_logger(logger)
-    log("enabled")
+    breakpoint_lock.acquire()
+    if not enabled:
+        enabled = True
+        console_connected = False
+        set_logger(logger)
+        signal.signal(signal.SIGCONT, handle_sigcont)
+        log("enabled")
+    breakpoint_lock.release()
 
 
 def log(msg):
@@ -73,7 +90,7 @@ def log(msg):
 
     pid = os.getpid()
     tid = threading.current_thread().ident
-    log_msg = "(PID: %d, TID: 0x%0.x): %s" \
+    log_msg = "pygdb: (PID: %d, TID: 0x%0.x): %s" \
         % (pid, tid, msg)
 
     if isinstance(gdb_logger, logging.Logger):
@@ -115,12 +132,3 @@ def set(logger=None):
         breakpoint_lock.acquire()
     breakpoint_lock.release()
     _pygdb.breakpoint_mark()
-
-
-def set_console_connected():
-    """NOTE: This function should only be called from the GNU Debugger (GDB)
-    console while execution is in 'interruption mode'.
-    Therefore applying locks is not needed and might cause deadlocks
-    in the GNU Debugger helper functions"""
-    global console_connected
-    console_connected = True

@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # pygdb.console.core - python gdb console core functions
-# Copyright (C) 2019  The pygdb Project lead by Brian Vinter
+# Copyright (C) 2019-2020  The pygdb Project lead by Brian Vinter
 #
 # This file is part of pygdb.
 #
